@@ -21,8 +21,8 @@ sample_json = {
     "State": "Selangor",
     "PhotoAmt": 1,
     "VideoAmt": 1,
-    "Description": 3, #number chosen
-    "Photo": 2 #number chosen
+    "Description": "3aa", #number chosen
+    "Photo": "2aa" #number chosen
 }
 
 @app.route('/')

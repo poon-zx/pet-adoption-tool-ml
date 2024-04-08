@@ -94,6 +94,8 @@ def preprocessing(data):
     # text data
     text_row = text_feats.loc[text_feats['PetID'] == data["Text"]]
     DescriptionLength = text_row['Length'].item()
+    text_row = text_row.drop(columns=["PetID", "Length"])
+
 
     # Size Age Interaction
     scaler = StandardScaler()
@@ -117,9 +119,13 @@ def preprocessing(data):
     tabular_result["SizeAgeInteraction"] = size_age_interaction
     tabular_result["RescuerActivity"] = "Medium"
 
-    text_dataframe = pd.DataFrame(tabular_result)
-    text_dataframe = pd.concat([text_dataframe, img_row])
-    # NEXT THING TO DO IS RUN THE YOLO AND BLURRINESS
+    img_dataframe = pd.DataFrame(tabular_result)
+    img_dataframe = pd.concat([img_dataframe, img_row])
+
+    text_dataframe = pd.concat([img_dataframe, text_row])
+
+    tabular_result = text_dataframe.squeeze().to_dict()
+    
 
 
 
