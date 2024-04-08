@@ -1,7 +1,9 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, make_response
 from flask_cors import CORS, cross_origin
 
+
 app = Flask(__name__)
+CORS(app)
 
 sample_json = {
     "Name": "Nibble",
@@ -29,13 +31,17 @@ sample_json = {
 def home():
     return jsonify({"message": "Welcome to the Flask app!"})
 
-@app.route('/upload', methods=["GET", "POST"])
+@app.post('/upload')
 @cross_origin(options=None)
 def upload():
     if request.method == "POST":
-        # data = request.form
-        data = sample_json
+        data = request.json
+        # data = sample_json
+    return jsonify(data)
 
+@app.post('/test')
+def test():
+    return jsonify({"message": "testing"})
 
 if __name__ == "__main__":
     app.run(debug=True)
