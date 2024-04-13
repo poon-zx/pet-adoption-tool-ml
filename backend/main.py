@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request, make_response
 from flask_cors import CORS, cross_origin
-
+from functions import preprocessing
 
 app = Flask(__name__)
 CORS(app)
@@ -37,7 +37,8 @@ def upload():
     if request.method == "POST":
         data = request.json
         # data = sample_json
-    return jsonify(data)
+    preprocessed_data = preprocessing(data)
+    return jsonify(preprocessed_data)
 
 @app.post('/test')
 def test():

@@ -2,7 +2,10 @@ from encoding_dicts import *
 import difflib
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import (StandardScaler)
+from sklearn.preprocessing import (StandardScaler, MinMaxScaler, LabelEncoder)
+import joblib
+import shap
+import xgboost
 
 img_feats = pd.read_csv("./csv_files/img_feats.csv")
 text_feats = pd.read_csv("./csv_files/text_feats.csv")
@@ -92,7 +95,7 @@ def preprocessing(data):
     img_row = img_row.drop(columns=["Pet_ID"])
 
     # text data
-    text_row = text_feats.loc[text_feats['PetID'] == data["Text"]]
+    text_row = text_feats.loc[text_feats['PetID'] == data["Description"]]
     DescriptionLength = text_row['Length'].item()
     text_row = text_row.drop(columns=["PetID", "Length"])
 
@@ -101,7 +104,9 @@ def preprocessing(data):
     scaler = StandardScaler()
 
     values = np.array([data["Age"], maturity_size_encode[data["MaturitySize"]]]).reshape(1, -1)
-    scaled_values = scaler.transform(values)
+    print("VALUES")
+    print(values)
+    scaled_values = scaler.fit_transform(values)
 
     size_age_interaction = scaled_values[0, 0] * scaled_values[0, 1]
 
@@ -119,12 +124,32 @@ def preprocessing(data):
     tabular_result["SizeAgeInteraction"] = size_age_interaction
     tabular_result["RescuerActivity"] = "Medium"
 
-    img_dataframe = pd.DataFrame(tabular_result)
-    img_dataframe = pd.concat([img_dataframe, img_row])
+    img_dataframe = pd.DataFrame([tabular_result])
 
-    text_dataframe = pd.concat([img_dataframe, text_row])
+    img_dataframe = pd.concat([img_dataframe.reset_index(drop=True), img_row.reset_index(drop=True)], axis=1)
 
-    tabular_result = text_dataframe.squeeze().to_dict()
+    text_dataframe = pd.concat([img_dataframe.reset_index(drop=True), text_row.reset_index(drop=True)], axis=1)
+    
+    # tabular_result = text_dataframe.squeeze().to_dict()
+
+    model = joblib.load("best_xgb_model.joblib")
+    explainer = shap.TreeExplainer(model)
+    print("pd dataframe")
+    print(text_dataframe["AgeBinned"])
+    print(text_dataframe["RescuerActivity"])
+    print(text_dataframe)
+
+    label_encoder = LabelEncoder()
+    text_dataframe['Breed2'] = label_encoder.fit_transform(text_dataframe['Breed2'])
+    text_dataframe['AgeBinned'] = label_encoder.fit_transform(text_dataframe['AgeBinned'])
+    text_dataframe['RescuerActivity'] = label_encoder.fit_transform(text_dataframe['RescuerActivity'])
+
+    print(text_dataframe.dtypes)
+
+
+    shap_values = explainer.shap_values(text_dataframe)
+    print(shap_values)
+    return tabular_result
     
 
 

@@ -7,6 +7,7 @@
         <SelectText v-if="selected=== 'selectText'" @selected="updateSelected" @text="updateDescription"/>
         <SelectImage v-if="selected=== 'selectImage'" @image="updateImage" @isLoading="updateIsLoading" @handleSubmit="handleSubmit"/>
         <Loading :isLoading = "isLoading"/>
+        <Result v-if="selected === 'result'" :result="result" :pet="pet"/>
         <!-- <button @click="test">CLICK HERE</button> -->
     </div>
 </template>
@@ -17,6 +18,7 @@ import InputForm from '../components/InputForm.vue';
 import SelectText from '../components/SelectText.vue';
 import SelectImage from '../components/SelectImage.vue';
 import Loading from '../components/Loading.vue';
+import Result from '../components/Result.vue';
 
 export default {
     components: {
@@ -24,12 +26,13 @@ export default {
         SelectText,
         SelectImage,
         Loading,
+        Result,
     },
     name: 'Home',
     data() {
         return {
             pet: {},
-            selected: "form",
+            selected: "result",
             isLoading: false,
             sample_json: {
                 Name: "Nibble",
@@ -51,6 +54,14 @@ export default {
                 VideoAmt: 1,
                 Description: "3aa",
                 Photo: "2aa"
+            },
+            result: {},
+            sample_result: {
+                Result: "1 Week",
+                Confidence: 0.8,
+                Pet: ['Don`t sterilize', 'Don`t deworm', 'Don`t vaccinate'],
+                Image: ['Increase photo amount', 'Increase video amount'],
+                Description: ['Add more description']
             }
         }
     }, 
