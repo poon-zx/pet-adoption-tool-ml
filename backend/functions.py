@@ -152,9 +152,6 @@ def preprocessing(data):
     return tabular_result
     
 
-
-
-
 def bin_age(value):
     labels = ['0-2', '2', '3-6', '6-12', '12-24', '24-60', '60+']
     ranges = [(0, 2), (2, 2), (3, 6), (6, 12), (12, 24), (24, 60), (60, float('inf'))]
