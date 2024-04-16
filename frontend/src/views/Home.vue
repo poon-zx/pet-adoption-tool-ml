@@ -32,7 +32,7 @@ export default {
     data() {
         return {
             pet: {},
-            selected: "result",
+            selected: "input",
             isLoading: false,
             sample_json: {
                 Name: "Nibble",
@@ -62,7 +62,8 @@ export default {
                 Pet: ['Don`t sterilize', 'Don`t deworm', 'Don`t vaccinate'],
                 Image: ['Increase photo amount', 'Increase video amount'],
                 Description: ['Add more description']
-            }
+            },
+            actualConfidence: null,
         }
     }, 
     methods: {
