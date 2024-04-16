@@ -32,7 +32,7 @@ export default {
     data() {
         return {
             pet: {},
-            selected: "input",
+            selected: "form",
             isLoading: false,
             sample_json: {
                 Name: "Nibble",
