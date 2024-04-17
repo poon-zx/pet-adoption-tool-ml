@@ -1,6 +1,44 @@
 from flask import Flask, jsonify, request, make_response
 from flask_cors import CORS, cross_origin
 from functions import preprocessing
+from sklearn.metrics import confusion_matrix
+import numpy as np
+
+def quadratic_kappa(actuals, preds, N=4):
+    """This function calculates the Quadratic Kappa Metric used for Evaluation in the PetFinder competition
+    at Kaggle. It returns the Quadratic Weighted Kappa metric score between the actual and the predicted values
+    of adoption rating."""
+    w = np.zeros((N,N))
+    O = confusion_matrix(actuals, preds)
+    for i in range(len(w)):
+        for j in range(len(w)):
+            w[i][j] = float(((i-j)**2)/(N-1)**2)
+
+    act_hist=np.zeros([N])
+    for item in actuals:
+        act_hist[item]+=1
+
+    pred_hist=np.zeros([N])
+    for item in preds:
+        pred_hist[item]+=1
+
+    E = np.outer(act_hist, pred_hist);
+    E = E/E.sum();
+    O = O/O.sum();
+
+    num=0
+    den=0
+    for i in range(len(w)):
+        for j in range(len(w)):
+            num+=w[i][j]*O[i][j]
+            den+=w[i][j]*E[i][j]
+    return (1 - (num/den))
+
+def quadratic_kappa_eval(preds, dtrain):
+    labels = dtrain.get_label()  # Extract the true labels
+    preds = np.argmax(preds, axis=1)  # Convert probabilities to predicted class labels
+    return 'qkappa', -quadratic_kappa(labels, preds, N=4)  # Return a tuple (name, value)
+
 
 app = Flask(__name__)
 CORS(app)
@@ -12,7 +50,7 @@ sample_json = {
     "Gender": "Male",
     "Breed1": "Golden",
     "Breed2": None,
-    "Colors": ["Blue", "Green"],
+    "Colors": ["Brown", "White"],
     "MaturitySize": "Medium",
     "FurLength": "Long",
     "Vaccinated": True,
@@ -23,8 +61,8 @@ sample_json = {
     "State": "Selangor",
     "PhotoAmt": 1,
     "VideoAmt": 1,
-    "Description": "3aa", #number chosen
-    "Photo": "2aa" #number chosen
+    "Description": "002efc654", #number chosen
+    "Photo": "002efc654" #number chosen
 }
 
 @app.route('/')

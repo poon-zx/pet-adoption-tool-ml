@@ -8,7 +8,7 @@
         <SelectImage v-if="selected=== 'selectImage'" @image="updateImage" @isLoading="updateIsLoading" @handleSubmit="handleSubmit"/>
         <Loading :isLoading = "isLoading"/>
         <Result v-if="selected === 'result'" :result="result" :pet="pet"/>
-        <!-- <button @click="test">CLICK HERE</button> -->
+        <button @click="test">CLICK HERE</button>
     </div>
 </template>
 
@@ -32,28 +32,28 @@ export default {
     data() {
         return {
             pet: {},
-            selected: "form",
+            selected: "result",
             isLoading: false,
-            sample_json: {
-                Name: "Nibble",
-                Type: "Dog",
-                Age: 3,
-                Gender: "Male",
-                Breed1: "Golden",
-                Breed2: null,
-                Colors: ["Blue", "Green"],
-                MaturitySize: "Medium",
-                FurLength: "Long",
-                Vaccinated: true,
-                Dewormed: false,
-                Sterilized: false,
-                Health: "Healthy",
-                Fee: 0,
-                State: "Selangor",
-                PhotoAmt: 1,
-                VideoAmt: 1,
-                Description: "3aa",
-                Photo: "2aa"
+            sample_json : {
+                "Name": "Nibble",
+                "Type": "Dog",
+                "Age": 3,
+                "Gender": "Male",
+                "Breed1": "Golden",
+                "Breed2": null,
+                "Colors": ["Brown", "White"],
+                "MaturitySize": "Medium",
+                "FurLength": "Long",
+                "Vaccinated": true,
+                "Dewormed": false,
+                "Sterilized": false,
+                "Health": "Healthy",
+                "Fee": 0,
+                "State": "Selangor",
+                "PhotoAmt": 1,
+                "VideoAmt": 1,
+                "Description": "002efc654", 
+                "Photo": "002efc654" 
             },
             result: {},
             sample_result: {

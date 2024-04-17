@@ -5,10 +5,48 @@ import numpy as np
 from sklearn.preprocessing import (StandardScaler, MinMaxScaler, LabelEncoder)
 import joblib
 import shap
-import xgboost
+import xgboost as xgb
+from sklearn.metrics import confusion_matrix
+
+def quadratic_kappa(actuals, preds, N=4):
+    """This function calculates the Quadratic Kappa Metric used for Evaluation in the PetFinder competition
+    at Kaggle. It returns the Quadratic Weighted Kappa metric score between the actual and the predicted values
+    of adoption rating."""
+    w = np.zeros((N,N))
+    O = confusion_matrix(actuals, preds)
+    for i in range(len(w)):
+        for j in range(len(w)):
+            w[i][j] = float(((i-j)**2)/(N-1)**2)
+
+    act_hist=np.zeros([N])
+    for item in actuals:
+        act_hist[item]+=1
+
+    pred_hist=np.zeros([N])
+    for item in preds:
+        pred_hist[item]+=1
+
+    E = np.outer(act_hist, pred_hist);
+    E = E/E.sum();
+    O = O/O.sum();
+
+    num=0
+    den=0
+    for i in range(len(w)):
+        for j in range(len(w)):
+            num+=w[i][j]*O[i][j]
+            den+=w[i][j]*E[i][j]
+    return (1 - (num/den))
+
+def quadratic_kappa_eval(preds, dtrain):
+    labels = dtrain.get_label()  # Extract the true labels
+    preds = np.argmax(preds, axis=1)  # Convert probabilities to predicted class labels
+    return 'qkappa', -quadratic_kappa(labels, preds, N=4)  # Return a tuple (name, value)
+
 
 img_feats = pd.read_csv("./csv_files/img_feats.csv")
 text_feats = pd.read_csv("./csv_files/text_feats.csv")
+X_reference = pd.read_csv("./csv_files/X.csv")
 
 def preprocessing(data):
     tabular_result = {}
@@ -21,9 +59,9 @@ def preprocessing(data):
         hasName = True
     
     # Treated
-    treated = False
+    treated = "Not Treated"
     if (data["Vaccinated"] and data["Dewormed"] and data["Sterilized"]):
-        treated = True
+        treated = "Treated"
 
     # Description Length
 
@@ -39,12 +77,16 @@ def preprocessing(data):
         if breed2 is not None:
             breed2 = find_closest_breed(breed2, dog_dict)
             breed2 = dog_dict[breed2]
+        else: 
+            breed2 = 0
     else:
         breed1 = find_closest_breed(breed1, cat_dict)
         breed1 = cat_dict[breed1]
         if breed2 is not None:
             breed2 = find_closest_breed(breed2, cat_dict)
             breed2 = cat_dict[breed2]
+        else: 
+            breed2 = 0
 
     color1 = data["Colors"][0]
     color2 = 0
@@ -96,7 +138,7 @@ def preprocessing(data):
 
     # text data
     text_row = text_feats.loc[text_feats['PetID'] == data["Description"]]
-    DescriptionLength = text_row['Length'].item()
+    DescriptionLength = int(text_row['Length'])
     text_row = text_row.drop(columns=["PetID", "Length"])
 
 
@@ -104,8 +146,6 @@ def preprocessing(data):
     scaler = StandardScaler()
 
     values = np.array([data["Age"], maturity_size_encode[data["MaturitySize"]]]).reshape(1, -1)
-    print("VALUES")
-    print(values)
     scaled_values = scaler.fit_transform(values)
 
     size_age_interaction = scaled_values[0, 0] * scaled_values[0, 1]
@@ -129,26 +169,61 @@ def preprocessing(data):
     img_dataframe = pd.concat([img_dataframe.reset_index(drop=True), img_row.reset_index(drop=True)], axis=1)
 
     text_dataframe = pd.concat([img_dataframe.reset_index(drop=True), text_row.reset_index(drop=True)], axis=1)
-    
-    # tabular_result = text_dataframe.squeeze().to_dict()
 
-    model = joblib.load("best_xgb_model.joblib")
-    explainer = shap.TreeExplainer(model)
-    print("pd dataframe")
-    print(text_dataframe["AgeBinned"])
-    print(text_dataframe["RescuerActivity"])
-    print(text_dataframe)
+    text_dataframe = text_dataframe.drop(columns=["Unnamed: 0"])
+
+    ohe_categorical_cols = ['Type', 'Breed1', 'Gender', 'Color1', 'Vaccinated', 'Dewormed', 'Sterilized', 'Health', 'State',
+                    'AgeBinned', 'Treated']
+
+    label_categorical_cols = ['MaturitySize', 'QuantityModified', 'LumpedFee', 'RescuerActivity']
 
     label_encoder = LabelEncoder()
-    text_dataframe['Breed2'] = label_encoder.fit_transform(text_dataframe['Breed2'])
-    text_dataframe['AgeBinned'] = label_encoder.fit_transform(text_dataframe['AgeBinned'])
-    text_dataframe['RescuerActivity'] = label_encoder.fit_transform(text_dataframe['RescuerActivity'])
+    for col in label_categorical_cols:
+        text_dataframe[col] = label_encoder.fit_transform(text_dataframe[col].astype(str))
 
-    print(text_dataframe.dtypes)
+    text_dataframe = pd.get_dummies(text_dataframe, columns=ohe_categorical_cols)
 
+    all_columns = X_reference.columns.tolist()
 
+    for col in all_columns:
+        if col not in text_dataframe.columns:
+            text_dataframe[col] = 0
+
+    text_dataframe = text_dataframe[all_columns]
+
+    # tabular_result = text_dataframe.squeeze().to_dict()
+
+    model = joblib.load("./models/best_xgb_model.joblib")
+    explainer = shap.TreeExplainer(model)
+
+    text_dataframe = text_dataframe.drop(columns=["Unnamed: 0"])
+
+    scalar = MinMaxScaler()
+    text_dataframe = scalar.fit_transform(text_dataframe.values)
     shap_values = explainer.shap_values(text_dataframe)
-    print(shap_values)
+    prediction_class = model.predict(text_dataframe)
+    probabilities = model.predict_proba(text_dataframe)
+
+    # If you want to display the most probable class and its confidence:
+    max_prob_index = np.argmax(probabilities[0])  
+    confidence_level = probabilities[0][max_prob_index]  
+
+    shap_values_for_class = []
+
+    for element in shap_values[0]:
+        shap_values_for_class.append(element[prediction_class][0])
+    
+    abs_shap_values = np.abs(shap_values_for_class)
+    top_indices = np.argsort(abs_shap_values)[-30:][::-1]
+    print(top_indices)
+
+    top_feature_names = [all_columns[i] for i in top_indices]
+    top_feature_values = [shap_values_for_class[i] for i in top_indices]
+
+    print("Top 30 features by SHAP value impact:")
+    for name, value in zip(top_feature_names, top_feature_values):
+        print(f"{name}: {value}")
+
     return tabular_result
     
 
