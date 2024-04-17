@@ -7,6 +7,7 @@ import joblib
 import shap
 import xgboost as xgb
 from sklearn.metrics import confusion_matrix
+import matplotlib.pyplot as plt
 
 def quadratic_kappa(actuals, preds, N=4):
     """This function calculates the Quadratic Kappa Metric used for Evaluation in the PetFinder competition
@@ -199,10 +200,10 @@ def preprocessing(data):
     text_dataframe = text_dataframe.drop(columns=["Unnamed: 0"])
 
     scalar = MinMaxScaler()
-    text_dataframe = scalar.fit_transform(text_dataframe.values)
-    shap_values = explainer.shap_values(text_dataframe)
-    prediction_class = model.predict(text_dataframe)
-    probabilities = model.predict_proba(text_dataframe)
+    text_dataframe_scale = scalar.fit_transform(text_dataframe.values)
+    shap_values = explainer.shap_values(text_dataframe_scale)
+    prediction_class = model.predict(text_dataframe_scale)
+    probabilities = model.predict_proba(text_dataframe_scale)
 
     # If you want to display the most probable class and its confidence:
     max_prob_index = np.argmax(probabilities[0])  
@@ -214,18 +215,135 @@ def preprocessing(data):
         shap_values_for_class.append(element[prediction_class][0])
     
     abs_shap_values = np.abs(shap_values_for_class)
-    top_indices = np.argsort(abs_shap_values)[-30:][::-1]
+    top_indices = np.argsort(abs_shap_values)[-80:][::-1]
     print(top_indices)
 
     top_feature_names = [all_columns[i] for i in top_indices]
     top_feature_values = [shap_values_for_class[i] for i in top_indices]
 
-    print("Top 30 features by SHAP value impact:")
+    print("Top 80 features by SHAP value impact:")
     for name, value in zip(top_feature_names, top_feature_values):
         print(f"{name}: {value}")
 
+    counter = 0
+    id = 0
+    suggestion_result = []
+    shapleys = {}
+    reference = {}
+    if prediction_class == 0 or prediction_class == 1:
+        reference = {}
+    else:
+        reference = bad_recommendations
+
+    if prediction_class == 0 or prediction_class == 1:
+        for feat in top_feature_names:
+            if feat in reference and top_feature_values[id] < 0:
+                suggestion = get_good_suggestion(reference, feat, int(text_dataframe[feat]))
+                if suggestion is not None:
+                    counter += 1
+                    suggestion_result.append(suggestion)
+                    shapleys[feat] = top_feature_values[id]
+            id += 1
+            if counter == 5:
+                break
+    else:
+        for feat in top_feature_names:
+            if feat in reference and top_feature_values[id] > 0:
+                suggestion = get_bad_suggestion(reference, feat, int(text_dataframe[feat]))
+                if suggestion is not None:
+                    counter += 1
+                    suggestion_result.append(suggestion)
+                    shapleys[feat] = top_feature_values[id]
+            id += 1
+            if counter == 5:
+                break
+
+    final_result = {
+        "Result": adoption_speed_mapping[int(prediction_class)],
+        "Confidence": confidence_level,
+        "Shapleys": shapleys,
+        "Recommendations": suggestion_result     
+    }
+    print(top_feature_values)
+    print(top_feature_names)
+    plot_shap_waterfall(top_feature_values, top_feature_names)
+
+    print(final_result)
     return tabular_result
     
+
+def plot_shap_waterfall(shap_values, feature_names, top_n=20):
+    top_n = min(top_n, len(shap_values) // 2)
+
+    sorted_indices = sorted(range(len(shap_values)), key=lambda i: shap_values[i])
+    top_negative_indices = sorted_indices[:top_n]
+    top_positive_indices = sorted_indices[-top_n:]
+
+    top_indices = top_negative_indices + top_positive_indices
+
+    selected_shap_values = [shap_values[i] for i in top_indices]
+    selected_feature_names = [feature_names[i] for i in top_indices]
+
+    plt.figure(figsize=(10, 8))
+    plt.barh(range(len(selected_shap_values)), selected_shap_values, color=['r' if val < 0 else 'b' for val in selected_shap_values])
+    plt.yticks(range(len(selected_shap_values)), selected_feature_names)
+    plt.xlabel("SHAP Value (Impact on Model Output)")
+    plt.title(f"Top {top_n} Positive and Top {top_n} Negative SHAP Values")
+    plt.gca().invert_yaxis()  
+    plt.tight_layout()
+    plt.savefig('top_shap_values.png')
+    plt.close()
+
+
+def get_bad_suggestion(ref, category, value):
+    conditions = ref.get(category, {})
+    
+    if category == "VideoAmt":
+        key = 0 if value == 0 else 1
+    elif category in ["PhotoAmt", "LumpedFee", "DescriptionLength", "reading_time"]:
+        key = 0 if value <= 3 else 1
+    elif category == "QuantityModified":
+        key = 1 if value > 1 else None
+    elif category == "Blurriness":
+        key = 0 if value < 60 else None
+    elif category == "polarity":
+        key = 0 if value < 0.25 else 1
+    elif category == "reading_ease":
+        key = 0 if value < 80 else None
+    elif category in ["Vaccinated_2", "Dewormed_2", "Sterilized_2", "FurLength"]:
+        key = value  
+    else:
+        key = None
+
+    return conditions.get(key, None)
+
+def get_good_suggestion(ref, category, value):
+    if category == "VideoAmt":
+        key = 1 if value > 0 else 0  
+    elif category == "PhotoAmt":
+        key = 0 if value <= 3 else 1
+    elif category == "QuantityModified":
+        key = 0 if value <= 1 else 1
+    elif category == "LumpedFee":
+        key = 0 if value == 0 else 1
+    elif category == "DescriptionLength":
+        key = 0 if value < 70 else 1
+    elif category == "Blurriness":
+        key = 1 if value > 60 else 0  
+    elif category == "polarity":
+        key = 0 if value < 0.25 else 1
+    elif category == "reading_ease":
+        key = 0 if value < 80 else None
+    elif category in ["Vaccinated_1", "Dewormed_1", "Sterilized_1", "FurLength"]:
+        key = value  
+    else:
+        key = None  
+
+    # Fetch the conditions and messages for the given category
+    recommendations = ref.get(category, {})
+    
+    # Return the message if the key exists in the recommendations, otherwise return None
+    return recommendations.get(key, None)
 
 def bin_age(value):
     labels = ['0-2', '2', '3-6', '6-12', '12-24', '24-60', '60+']

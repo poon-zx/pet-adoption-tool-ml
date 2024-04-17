@@ -1,8 +1,10 @@
-from flask import Flask, jsonify, request, make_response
+from flask import Flask, jsonify, request, make_response, send_file
 from flask_cors import CORS, cross_origin
 from functions import preprocessing
 from sklearn.metrics import confusion_matrix
 import numpy as np
+import matplotlib.pyplot as plt
+import shap
 
 def quadratic_kappa(actuals, preds, N=4):
     """This function calculates the Quadratic Kappa Metric used for Evaluation in the PetFinder competition
@@ -81,6 +83,10 @@ def upload():
 @app.post('/test')
 def test():
     return jsonify({"message": "testing"})
+
+@app.route('/shap_plot')
+def serve_shap_plot():
+    return send_file('top_shap_values.png', mimetype='image/png')
 
 if __name__ == "__main__":
     app.run(debug=True)
