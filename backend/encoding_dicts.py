@@ -1,3 +1,7 @@
+recommendations = {
+    
+}
+
 type_encode = {
     "Dog": 1,
     "Cat": 2
