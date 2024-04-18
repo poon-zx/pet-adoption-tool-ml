@@ -201,7 +201,7 @@ def preprocessing(data):
     text_dataframe = text_dataframe.drop(columns=["Unnamed: 0"])
 
     scalar = joblib.load("./models/MinMaxscaler.save") 
-    text_dataframe_scale = scalar.fit_transform(text_dataframe.values)
+    text_dataframe_scale = scalar.transform(text_dataframe.values)
     shap_values = explainer.shap_values(text_dataframe_scale)
     prediction_class = model.predict(text_dataframe_scale)
     probabilities = model.predict_proba(text_dataframe_scale)
