@@ -45,14 +45,17 @@
                 </table>
             </div>
         </div>
-        <div>
-            <img src="http://127.0.0.1:5000/shap_plot" alt="SHAP Values Waterfall Plot" width="100%">
+        <div class="bar-chart">
+            <bar-chart :data="shapData" xtitle="SHAP Value (Impact on Model Output)" :colors="barColors" title="Top 20 Positive and Top 20 Negative SHAP Values"></bar-chart>
+            <!-- <img src="http://127.0.0.1:5000/shap_plot" alt="SHAP Values Waterfall Plot" width="100%"> -->
         </div>
     </div>
 </template>
 
 <script>
 import RadialProgress from "vue3-radial-progress";
+import "chart.js";
+import "chartkick/chart.js";
 
 export default {
     components: {
@@ -70,7 +73,11 @@ export default {
         actualConfidence: {
             type: Number,
             required: true
-        }
+        },
+        shapData: {
+            type: Object,
+            required: true
+        },
     },
     data() {
         return {
@@ -82,10 +89,27 @@ export default {
 
             },
             actualSampleConfidence: 0.6,
+            chartData: {
+                attribute1: -0.221,
+                attribute2: 0.11,
+                attribute3: 0.05,
+                attribute4: -0.03,
+                attribute5: 0.02,
+                attribute6: -0.25,
+            },
+            positiveColor: '#3F51B5', // Blue
+            negativeColor: '#FF5722', // Red
+            barColors: [],
         }
     },
     mounted() {
+        console.log("mounted");
         this.startUpdateConfidence();
+        this.setBarColors();
+    },
+    created() {
+        console.log("created");
+        this.setBarColors();
     },
     methods: {
         startUpdateConfidence() {
@@ -98,6 +122,14 @@ export default {
             this.sample_result.Confidence = this.actualSampleConfidence;
             this.result.Confidence = this.actualConfidence;
         },
+        setBarColors() {
+            console.log("setBarColors");
+            console.log(this.shapData);
+
+            this.barColors = Object.values(this.shapData).map(value => {
+                return value >= 0 ? this.positiveColor : this.negativeColor;
+            });
+        }
     },
 };
 </script>
@@ -194,4 +226,16 @@ table {
   tr:nth-child(even) td {
     background-color: #F5F5F5;
   }
+
+#chart-1 {
+    height: 800px !important;
+}
+
+#chart-5 {
+    height: 800px !important;
+}
+
+[id^="chart"] {
+    height: 800px !important;
+}
 </style>

@@ -97,7 +97,7 @@ def test():
 
 @app.route('/shap_plot')
 def serve_shap_plot():
-    return send_file('top_shap_values.png', mimetype='image/png')
+    return encoded_img
 
 if __name__ == "__main__":
     app.run(debug=True)

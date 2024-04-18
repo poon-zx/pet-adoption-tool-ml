@@ -7,8 +7,8 @@
         <SelectText v-if="selected=== 'selectText'" @selected="updateSelected" @text="updateDescription"/>
         <SelectImage v-if="selected=== 'selectImage'" @image="updateImage" @isLoading="updateIsLoading" @handleSubmit="handleSubmit"/>
         <Loading :isLoading = "isLoading"/>
-        <Result v-if="selected === 'result'" :result="result" :pet="pet" :actualConfidence="actualConfidence"/>
-        <button @click="test">CLICK HERE</button>
+        <Result v-if="selected === 'result'" :result="result" :pet="pet" :actualConfidence="actualConfidence" :shapData="shapData"/>
+        <!-- <button @click="test">CLICK HERE</button> -->
     </div>
 </template>
 
@@ -56,7 +56,8 @@ export default {
                 "Photo": "002efc654" 
             },
             result: {},
-            actualConfidence: 0
+            actualConfidence: 0,
+            shapData: {},
         }
     }, 
     methods: {
@@ -79,13 +80,22 @@ export default {
         async handleSubmit() {
             try {
                 const response = await axios.post('http://127.0.0.1:5000/upload', this.pet);
-                this.selected = 'result';
-                this.isLoading = false;
-                const temp = response.data;
+                const temp = response.data[0];
                 console.log(temp);
                 this.actualConfidence = parseFloat((temp.Confidence).toFixed(3));
-                this.result = response.data;
+                this.result = response.data[0];
                 this.result.Confidence = 0;
+                const shapValues = response.data[1];
+                const shapFeatures = response.data[2];
+
+                let shapData = {};
+                for (let i = 0; i < shapValues.length; i++) {
+                    shapData[shapFeatures[i]] = shapValues[i];
+                }
+                this.shapData = shapData;
+                this.selected = 'result';
+                this.isLoading = false;
+
             } catch(error) {
                 console.error(error);   
             }
@@ -93,14 +103,22 @@ export default {
         async test() {
             try {
                 const response = await axios.post('http://127.0.0.1:5000/upload', this.sample_json);
-                this.isLoading = false;
-                this.selected == 'result';
                 console.log(response.data);
-                const temp = response.data;
+                const temp = response.data[0];
+                console.log(temp);
                 this.actualConfidence = parseFloat((temp.Confidence).toFixed(3));
-                console.log(this.actualConfidence);
-                this.result = response.data;
+                this.result = response.data[0];
                 this.result.Confidence = 0;
+                const shapValues = response.data[1];
+                const shapFeatures = response.data[2];
+
+                let shapData = {};
+                for (let i = 0; i < shapValues.length; i++) {
+                    shapData[shapFeatures[i]] = shapValues[i];
+                }
+                this.shapData = shapData;
+                this.selected = 'result';
+                this.isLoading = false;
             } catch(error) {
                 console.error(error);   
             }
