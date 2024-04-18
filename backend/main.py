@@ -43,7 +43,7 @@ def quadratic_kappa_eval(preds, dtrain):
 
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 sample_json = {
     "Name": "Nibble",
@@ -67,6 +67,14 @@ sample_json = {
     "Photo": "002efc654" #number chosen
 }
 
+sample_result = {
+    "Result": "1 Week",
+    "Confidence": 0.8,
+    "Shapleys": {"FurLength": 0.221, "PhotoAmt": 0.11},
+    "Recommendations": ['Increase photo amount', 'Add more description', 'Don`t vaccinate'],
+},
+
+
 @app.route('/')
 def home():
     return jsonify({"message": "Welcome to the Flask app!"})
@@ -78,15 +86,18 @@ def upload():
         data = request.json
         # data = sample_json
     preprocessed_data = preprocessing(data)
-    return jsonify(preprocessed_data)
+    print("TEST POST")
+    print(preprocessed_data)
+    print(jsonify(preprocessed_data))
+    return preprocessed_data
 
-@app.post('/test')
+@app.route('/test')
 def test():
     return jsonify({"message": "testing"})
 
 @app.route('/shap_plot')
 def serve_shap_plot():
-    return send_file('top_shap_values.png', mimetype='image/png')
+    return encoded_img
 
 if __name__ == "__main__":
     app.run(debug=True)

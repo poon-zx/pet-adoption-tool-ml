@@ -8,6 +8,7 @@ import shap
 import xgboost as xgb
 from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
+import base64
 
 def quadratic_kappa(actuals, preds, N=4):
     """This function calculates the Quadratic Kappa Metric used for Evaluation in the PetFinder competition
@@ -163,7 +164,7 @@ def preprocessing(data):
     tabular_result["LumpedFee"] = LumpedFee
     tabular_result["DescriptionLength"] = DescriptionLength
     tabular_result["SizeAgeInteraction"] = size_age_interaction
-    tabular_result["RescuerActivity"] = "Medium"
+    tabular_result["RescuerActivity"] = "High"
 
     img_dataframe = pd.DataFrame([tabular_result])
 
@@ -207,7 +208,7 @@ def preprocessing(data):
 
     # If you want to display the most probable class and its confidence:
     max_prob_index = np.argmax(probabilities[0])  
-    confidence_level = probabilities[0][max_prob_index]  
+    confidence_level = float(probabilities[0][max_prob_index])
 
     shap_values_for_class = []
 
@@ -242,7 +243,7 @@ def preprocessing(data):
                 if suggestion is not None:
                     counter += 1
                     suggestion_result.append(suggestion)
-                    shapleys[feat] = top_feature_values[id]
+                    shapleys[feat] = float(top_feature_values[id])
             id += 1
             if counter == 5:
                 break
@@ -253,7 +254,7 @@ def preprocessing(data):
                 if suggestion is not None:
                     counter += 1
                     suggestion_result.append(suggestion)
-                    shapleys[feat] = top_feature_values[id]
+                    shapleys[feat] = float(top_feature_values[id])
             id += 1
             if counter == 5:
                 break
@@ -266,10 +267,22 @@ def preprocessing(data):
     }
     print(top_feature_values)
     print(top_feature_names)
-    plot_shap_waterfall(top_feature_values, top_feature_names)
+    # plot_shap_waterfall(top_feature_values, top_feature_names)
+    shap_values = top_feature_values
+    feature_names = top_feature_names
+
+    top_n = min(20, len(shap_values) // 2)
+    sorted_indices = sorted(range(len(shap_values)), key=lambda i: shap_values[i])
+    top_negative_indices = sorted_indices[:top_n]
+    top_positive_indices = sorted_indices[-top_n:]
+
+    top_indices = top_negative_indices + top_positive_indices
+
+    selected_shap_values = [float(shap_values[i]) for i in top_indices]
+    selected_feature_names = [feature_names[i] for i in top_indices]
 
     print(final_result)
-    return tabular_result
+    return [final_result, selected_shap_values, selected_feature_names]
     
 
 def plot_shap_waterfall(shap_values, feature_names, top_n=20):
