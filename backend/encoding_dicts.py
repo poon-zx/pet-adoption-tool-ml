@@ -1,5 +1,102 @@
-recommendations = {
-    
+adoption_speed_mapping = {
+    0: 'Adopted between 0 and 7 days',
+    1: 'Adopted between 8 and 30 days',
+    2: 'Adopted between 31 and 90 days',
+    3: 'No adoption after 100 days'
+}
+
+bad_recommendations = {
+    "FurLength": {
+        1: "Consider growing out your pet's hair to a longer length",
+        3: "Keeping your pet's hair shorter might improve adoption rates"
+    }, 
+    "VideoAmt": { # if 0, then 0, if more than 0, then 1
+        0: "Upload more videos!",
+    },
+    "PhotoAmt": { # if 3 or less, then 0, if 4 or more, then 1
+        0: "Your listing should contain more photos of your pet",
+        1: "Consider having less pictures as it may appear too cluttered"
+    },
+    "QuantityModified": { # if more than 1, then 1
+        1: "You should have separate listings for each pet to improve adoption speeds"
+    },
+    "LumpedFee": { # if 0, then 0, else 1
+        0: "Slightly increasing the adoption fee might attract more adopters",
+        1: "Reducing the cost of adoption or making it free might attract potential adopters"
+    }, 
+    "DescriptionLength": { # if below 70 words, then 0, else 1
+        0: "Increasing the length of your description could give potential adopters more information about your pet",
+        1: "Decrease the length of your description, keep it short and sweet!"
+    },
+    "Blurriness": { # if below 60, then 0, else 1
+        0: "Choose a less blurry image for your adoption listing!"
+    },
+    "polarity": { # if below 0.25 then 0, else 1
+        0: "Your description can be more positive! That would attract more potential adopters"
+    },
+    "reading_time": { # if below 4 then 0, else 1
+        0: "Your description's estimated reading time might be too short, consider making it longer!",
+        1: "Your description's estimated reading time is too long, do make it shorter"
+    },
+    "reading_ease": { # if below 80 then 0, else 1
+        0: "Your description is not readable enough, do increase its readability by making sentences shorter or less complicated words!"
+    }, 
+    "Vaccinated_2": {
+        1: "Do vaccinate your pet, this would likely increase the number of potential adopters!"
+    },
+    "Dewormed_2": {
+        1: "Do deworm your pet, this would likely increase the number of potential adopters!"
+    },
+    "Sterilized_2": {
+        1: "Do sterilize your pet, this would likely increase the number of potential adopters!"
+    }    
+}
+
+good_recommendations = {
+    "FurLength": {
+        1: "Continue keeping your pet's hair short, that is popular with adopters!",
+        3: "Continue keeping your pet's hair long, that is popular with adopters!"
+    }, 
+    "VideoAmt": { # if 0, then 0, if more than 0, then 1
+        1: "It is good that you uploaded many videos!",
+    },
+    "PhotoAmt": { # if 3 or less, then 0, if 4 or more, then 1
+        0: "It is good that you have minimal photos of your pet, that is helping with adopters",
+        1: "It is good that you have many photos of your pet, adopters can have a good idea of how cute your pet is!"
+    },
+    "QuantityModified": { # if more than 1, then 1
+        0: "Good that the listing only contains one pet, making it easier to attract potential adopters!"
+    },
+    "LumpedFee": { # if 0, then 0, else 1
+        0: "Keeping the adoption fee free has helped in attracting potential adopters",
+        1: "It is good that you charged a small fee for the adoption of your pet"
+    }, 
+    "DescriptionLength": { # if below 70 words, then 0, else 1
+        0: "You kept your listing description short and sweet, nice!",
+        1: "Your informative description has helped potential adopters learn more about your pet!"
+    },
+    "Blurriness": { # if below 60, then 0, else 1
+        1: "It is good that you chose a listing picture that is not blurry!"
+    },
+    "polarity": { # if below 0.25 then 0, else 1
+        1: "The high polarity and positivity of your description has helped in attracting adopters"
+    },
+    "reading_time": { # if below 4 then 0, else 1
+        0: "Your description is short and has a low reading time, catching the eye of potential adopters!",
+        1: "The reading time of your description is slightly longer, providing sufficient information to adopters"
+    },
+    "reading_ease": { # if below 80 then 0, else 1
+        1: "Your description has high readability, which definitely has helped in increasing the popularity of your listing"
+    }, 
+    "Vaccinated_1": {
+        1: "The fact that you vaccinated your pet has played a part in attracting more potential adopters!"
+    },
+    "Dewormed_1": {
+        1: "The fact that you dewormed your pet has played a part in attracting more potential adopters!"
+    },
+    "Sterilized_1": {
+        1: "The fact that you sterilized your pet has played a part in attracting more potential adopters!"
+    }    
 }
 
 type_encode = {
