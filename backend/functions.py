@@ -211,34 +211,37 @@ def preprocessing(data):
     confidence_level = float(probabilities[0][max_prob_index])
 
     shap_values_for_class = []
+    shap_values_for_chart = []
 
     for element in shap_values[0]:
-        shap_values_for_class.append(element[prediction_class][0])
+        shap_values_for_class.append(element[0])
+        shap_values_for_chart.append(element[prediction_class[0]])
     
     abs_shap_values = np.abs(shap_values_for_class)
-    top_indices = np.argsort(abs_shap_values)[-80:][::-1]
-    print(top_indices)
+    top_indices_class = np.argsort(abs_shap_values)[-80:][::-1]
 
-    top_feature_names = [all_columns[i] for i in top_indices]
-    top_feature_values = [shap_values_for_class[i] for i in top_indices]
+    abs_shap_values_chart = np.abs(shap_values_for_chart)
+    top_indices_chart = np.argsort(abs_shap_values_chart)[-80:][::-1]
 
-    print("Top 80 features by SHAP value impact:")
-    for name, value in zip(top_feature_names, top_feature_values):
-        print(f"{name}: {value}")
+    top_feature_names= [all_columns[i] for i in top_indices_class]
+    top_feature_values = [shap_values_for_class[i] for i in top_indices_class]
+
+    top_feature_names_chart = [all_columns[i] for i in top_indices_chart]
+    top_feature_values_chart = [shap_values_for_chart[i] for i in top_indices_chart]
 
     counter = 0
     id = 0
     suggestion_result = []
     shapleys = {}
     reference = {}
-    if prediction_class == 0 or prediction_class == 1:
+    if prediction_class == 0:
         reference = good_recommendations
     else:
         reference = bad_recommendations
 
     if prediction_class == 0 or prediction_class == 1:
         for feat in top_feature_names:
-            if feat in reference and top_feature_values[id] < 0:
+            if feat in reference and top_feature_values[id] > 0:
                 suggestion = get_good_suggestion(reference, feat, int(text_dataframe[feat]))
                 if suggestion is not None:
                     counter += 1
@@ -249,7 +252,7 @@ def preprocessing(data):
                 break
     else:
         for feat in top_feature_names:
-            if feat in reference and top_feature_values[id] > 0:
+            if feat in reference and top_feature_values[id] < 0:
                 suggestion = get_bad_suggestion(reference, feat, int(text_dataframe[feat]))
                 if suggestion is not None:
                     counter += 1
@@ -265,11 +268,10 @@ def preprocessing(data):
         "Shapleys": shapleys,
         "Recommendations": suggestion_result     
     }
-    print(top_feature_values)
-    print(top_feature_names)
+
     # plot_shap_waterfall(top_feature_values, top_feature_names)
-    shap_values = top_feature_values
-    feature_names = top_feature_names
+    shap_values = top_feature_values_chart
+    feature_names = top_feature_names_chart
 
     top_n = min(20, len(shap_values) // 2)
     sorted_indices = sorted(range(len(shap_values)), key=lambda i: shap_values[i])
