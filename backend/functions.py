@@ -232,7 +232,7 @@ def preprocessing(data):
     shapleys = {}
     reference = {}
     if prediction_class == 0 or prediction_class == 1:
-        reference = {}
+        reference = good_recommendations
     else:
         reference = bad_recommendations
 
