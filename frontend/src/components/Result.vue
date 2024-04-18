@@ -8,15 +8,23 @@
                     <p>Confidence</p>
                     <RadialProgress 
                         :diameter="150"
-                        :completed-steps="sample_result.Confidence"
+                        :completed-steps="this.result.Confidence"
                         :total-steps="1"
                         :strokeWidth="20"
                         :innerStrokeWidth="20"
                         :animateSpeed="600"
                         :startColor="'#E55D2D'"
                         :stopColor="'#D64E1E'">
-                        {{ this.actualSampleConfidence }}</RadialProgress>
+                        {{ this.actualConfidence }}</RadialProgress>
                 </div>
+            </div>
+        </div>
+        <div class="prediction-container">
+            <h1>Recommended Actions</h1>
+            <div class="flex-center">
+                <ul>
+                    <li v-for="action in result.Recommendations" :key="action">{{ action }}</li>
+                </ul>
             </div>
         </div>
     </div>
@@ -60,12 +68,14 @@ export default {
     },
     methods: {
         startUpdateConfidence() {
-        setTimeout(() => {
-            this.updateConfidence();
-        }, 80); 
+            setTimeout(() => {
+                this.updateConfidence();
+            }, 80); 
         },
         updateConfidence() {
-        this.sample_result.Confidence = this.actualSampleConfidence;
+            console.log("updateConfidence");
+            this.sample_result.Confidence = this.actualSampleConfidence;
+            this.result.Confidence = this.actualConfidence;
         },
     },
 };
@@ -105,6 +115,7 @@ export default {
     border-radius: 2rem;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
     /* margin: 0 200px; */
+    margin: 20px 0;
 }
 
 .confidence-container {

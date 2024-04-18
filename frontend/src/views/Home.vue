@@ -7,7 +7,7 @@
         <SelectText v-if="selected=== 'selectText'" @selected="updateSelected" @text="updateDescription"/>
         <SelectImage v-if="selected=== 'selectImage'" @image="updateImage" @isLoading="updateIsLoading" @handleSubmit="handleSubmit"/>
         <Loading :isLoading = "isLoading"/>
-        <Result v-if="selected === 'result'" :result="result" :pet="pet"/>
+        <Result v-if="selected === 'result'" :result="result" :pet="pet" :actualConfidence="actualConfidence"/>
         <button @click="test">CLICK HERE</button>
     </div>
 </template>
@@ -32,7 +32,7 @@ export default {
     data() {
         return {
             pet: {},
-            selected: "result",
+            selected: "form",
             isLoading: false,
             sample_json : {
                 "Name": "Nibble",
@@ -56,14 +56,7 @@ export default {
                 "Photo": "002efc654" 
             },
             result: {},
-            sample_result: {
-                Result: "1 Week",
-                Confidence: 0.8,
-                Pet: ['Don`t sterilize', 'Don`t deworm', 'Don`t vaccinate'],
-                Image: ['Increase photo amount', 'Increase video amount'],
-                Description: ['Add more description']
-            },
-            actualConfidence: null,
+            actualConfidence: 0
         }
     }, 
     methods: {
@@ -86,7 +79,14 @@ export default {
         async handleSubmit() {
             try {
                 const response = await axios.post('http://127.0.0.1:5000/upload', this.pet);
-                console.log(response.data);
+                this.selected = 'result';
+                console.log(this.selected);
+                this.isLoading = false;
+                console.log(response.data[0]);
+                const temp = response.data[0];
+                this.actualConfidence = temp.Confidence;
+                this.result = response.data[0];
+                this.result.Confidence = 0;
             } catch(error) {
                 console.error(error);   
             }
@@ -94,7 +94,13 @@ export default {
         async test() {
             try {
                 const response = await axios.post('http://127.0.0.1:5000/upload', this.sample_json);
-                console.log(response.data);
+                this.isLoading = false;
+                this.selected == 'result';
+                console.log(response.data[0]);
+                const temp = response.data[0];
+                this.actualConfidence = temp.Confidence;
+                this.result = response.data[0];
+                this.result.Confidence = 0;
             } catch(error) {
                 console.error(error);   
             }
