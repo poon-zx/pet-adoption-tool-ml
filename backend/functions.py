@@ -207,7 +207,7 @@ def preprocessing(data):
 
     # If you want to display the most probable class and its confidence:
     max_prob_index = np.argmax(probabilities[0])  
-    confidence_level = probabilities[0][max_prob_index]  
+    confidence_level = float(probabilities[0][max_prob_index])
 
     shap_values_for_class = []
 
@@ -242,7 +242,7 @@ def preprocessing(data):
                 if suggestion is not None:
                     counter += 1
                     suggestion_result.append(suggestion)
-                    shapleys[feat] = top_feature_values[id]
+                    shapleys[feat] = float(top_feature_values[id])
             id += 1
             if counter == 5:
                 break
@@ -253,7 +253,7 @@ def preprocessing(data):
                 if suggestion is not None:
                     counter += 1
                     suggestion_result.append(suggestion)
-                    shapleys[feat] = top_feature_values[id]
+                    shapleys[feat] = float(top_feature_values[id])
             id += 1
             if counter == 5:
                 break
@@ -266,10 +266,10 @@ def preprocessing(data):
     }
     print(top_feature_values)
     print(top_feature_names)
-    plot_shap_waterfall(top_feature_values, top_feature_names)
+    # plot_shap_waterfall(top_feature_values, top_feature_names)
 
     print(final_result)
-    return tabular_result
+    return final_result
     
 
 def plot_shap_waterfall(shap_values, feature_names, top_n=20):

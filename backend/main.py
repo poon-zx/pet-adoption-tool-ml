@@ -43,8 +43,7 @@ def quadratic_kappa_eval(preds, dtrain):
 
 
 app = Flask(__name__)
-CORS(app)
-app.config['CORS_HEADERS'] = 'application/json'
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 sample_json = {
     "Name": "Nibble",
@@ -75,6 +74,7 @@ sample_result = {
     "Recommendations": ['Increase photo amount', 'Add more description', 'Don`t vaccinate'],
 },
 
+
 @app.route('/')
 def home():
     return jsonify({"message": "Welcome to the Flask app!"})
@@ -86,9 +86,12 @@ def upload():
         data = request.json
         # data = sample_json
     preprocessed_data = preprocessing(data)
-    return jsonify(sample_result)
+    print("TEST POST")
+    print(preprocessed_data)
+    print(jsonify(preprocessed_data))
+    return preprocessed_data
 
-@app.post('/test')
+@app.route('/test')
 def test():
     return jsonify({"message": "testing"})
 

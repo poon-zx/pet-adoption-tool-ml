@@ -3,7 +3,7 @@
         <div class="prediction-container">
             <h1>Predicted Adoption Speed</h1>
             <div class="flex-center">
-                <h2>{{ sample_result.Result }}</h2>
+                <h2>{{ this.result.Result }}</h2>
                 <div class="confidence-container">
                     <p>Confidence</p>
                     <RadialProgress 
@@ -19,13 +19,34 @@
                 </div>
             </div>
         </div>
-        <div class="prediction-container">
-            <h1>Recommended Actions</h1>
-            <div class="flex-center">
-                <ul>
-                    <li v-for="action in result.Recommendations" :key="action">{{ action }}</li>
-                </ul>
+        <div class="result-grid-container">
+            <div class="prediction-container">
+                <h1>Recommended Actions</h1>
+                <div class="flex-center">
+                    <ul>
+                        <li v-for="action in this.result.Recommendations" :key="action">{{ action }}</li>
+                    </ul>
+                </div>
             </div>
+            <div class="prediction-container">
+                <table>
+                    <thead>
+                        <tr>
+                        <th>Attribute</th>
+                        <th>SHAP value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(value, attribute) in this.result.Shapleys" :key="attribute">
+                        <td>{{ attribute }}</td>
+                        <td>{{ value }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div>
+            <img src="http://127.0.0.1:5000/shap_plot" alt="SHAP Values Waterfall Plot" width="100%">
         </div>
     </div>
 </template>
@@ -56,9 +77,9 @@ export default {
             sample_result: {
                 Result: "1 Week",
                 Confidence: 0,
-                Pet: ['Don`t sterilize', 'Don`t deworm', 'Don`t vaccinate'],
-                Image: ['Increase photo amount', 'Increase video amount'],
-                Description: ['Add more description']
+                Shapleys: {"FurLength": 0.221, "PhotoAmt": 0.11},
+                Recommendations: ['Increase photo amount', 'Add more description', 'Don`t vaccinate'],
+
             },
             actualSampleConfidence: 0.6,
         }
@@ -114,8 +135,8 @@ export default {
     padding: 2rem;
     border-radius: 2rem;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-    /* margin: 0 200px; */
     margin: 20px 0;
+    align-items: center;
 }
 
 .confidence-container {
@@ -136,31 +157,41 @@ export default {
 .vrp__inner {
     font-size: x-large !important;
 }
-/* .arrow {
-    z-index: 999;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-75%, -100%);
+
+.result-grid-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 20px 20px;
 }
 
-@media screen and (max-width: 768px) {
-    .arrow {
-        transform: translate(-27%, -100%);
+@media (max-width: 740px) {
+    .result-grid-container {
+        display: block;
     }
 }
 
-@media screen and (max-width: 620px) {
-    .arrow {
-        transform: translate(-27%, -60%);
-    }
-}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: Arial, sans-serif;
+  }
 
-@media screen and (max-width: 588px) {
-    .arrow {
-        transform: translate(-44%, -25%);
-    }
-} */
+  th, td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
 
+  th {
+    background-color: #E55E2D;
+    color: white;
+  }
 
+  td {
+    background-color: #FCFCFC;
+  }
+
+  tr:nth-child(even) td {
+    background-color: #F5F5F5;
+  }
 </style>

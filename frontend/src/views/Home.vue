@@ -80,12 +80,11 @@ export default {
             try {
                 const response = await axios.post('http://127.0.0.1:5000/upload', this.pet);
                 this.selected = 'result';
-                console.log(this.selected);
                 this.isLoading = false;
-                console.log(response.data[0]);
-                const temp = response.data[0];
-                this.actualConfidence = temp.Confidence;
-                this.result = response.data[0];
+                const temp = response.data;
+                console.log(temp);
+                this.actualConfidence = parseFloat((temp.Confidence).toFixed(3));
+                this.result = response.data;
                 this.result.Confidence = 0;
             } catch(error) {
                 console.error(error);   
@@ -96,10 +95,11 @@ export default {
                 const response = await axios.post('http://127.0.0.1:5000/upload', this.sample_json);
                 this.isLoading = false;
                 this.selected == 'result';
-                console.log(response.data[0]);
-                const temp = response.data[0];
-                this.actualConfidence = temp.Confidence;
-                this.result = response.data[0];
+                console.log(response.data);
+                const temp = response.data;
+                this.actualConfidence = parseFloat((temp.Confidence).toFixed(3));
+                console.log(this.actualConfidence);
+                this.result = response.data;
                 this.result.Confidence = 0;
             } catch(error) {
                 console.error(error);   
