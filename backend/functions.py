@@ -8,7 +8,15 @@ import shap
 import xgboost as xgb
 from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
-import base64
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import firestore
+
+# Use a service account
+if (not len(firebase_admin._apps)):
+	cred = credentials.Certificate('./pet-adoption-tool-ml-firebase-adminsdk-fv4oh-5ab8f299bd.json')
+	firebase_admin.initialize_app(cred)
+db = firestore.client()
 
 def quadratic_kappa(actuals, preds, N=4):
     """This function calculates the Quadratic Kappa Metric used for Evaluation in the PetFinder competition

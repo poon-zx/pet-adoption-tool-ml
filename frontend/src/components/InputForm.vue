@@ -7,7 +7,7 @@
             </div>
             <div class="flex">
                 <div class="age-field">
-                    <label for="age">Age</label>
+                    <label for="age">Age (months)</label>
                     <input v-model="pet.Age" type="number" id="age" name="age" min="0" required :class="pet.Age ? '' : 'input-false'"/>
                 </div>
                 <div class="gender-field">
