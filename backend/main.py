@@ -1,10 +1,13 @@
 from flask import Flask, jsonify, request, make_response, send_file
 from flask_cors import CORS, cross_origin
-from functions import preprocessing
+from functions import preprocessing, quadratic_kappa, quadratic_kappa_eval
 from sklearn.metrics import confusion_matrix
 import numpy as np
 import matplotlib.pyplot as plt
 import shap
+from dotenv import load_dotenv
+import os
+import __main__
 
 def quadratic_kappa(actuals, preds, N=4):
     """This function calculates the Quadratic Kappa Metric used for Evaluation in the PetFinder competition
@@ -35,14 +38,19 @@ def quadratic_kappa(actuals, preds, N=4):
             num+=w[i][j]*O[i][j]
             den+=w[i][j]*E[i][j]
     return (1 - (num/den))
+__main__.quadratic_kappa = quadratic_kappa
 
 def quadratic_kappa_eval(preds, dtrain):
     labels = dtrain.get_label()  # Extract the true labels
     preds = np.argmax(preds, axis=1)  # Convert probabilities to predicted class labels
     return 'qkappa', -quadratic_kappa(labels, preds, N=4)  # Return a tuple (name, value)
 
+__main__.quadratic_kappa_eval = quadratic_kappa_eval
 
 app = Flask(__name__)
+load_dotenv()
+app.config['DEBUG'] = os.environ.get('FLASK_DEBUG')
+
 CORS(app, resources={r"/*": {"origins": "*"}})
 
 sample_json = {
@@ -95,9 +103,9 @@ def upload():
 def test():
     return jsonify({"message": "testing"})
 
-@app.route('/shap_plot')
-def serve_shap_plot():
-    return encoded_img
+# @app.route('/shap_plot')
+# def serve_shap_plot():
+#     return encoded_img
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()

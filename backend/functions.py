@@ -8,15 +8,7 @@ import shap
 import xgboost as xgb
 from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
-import firebase_admin
-from firebase_admin import credentials
-from firebase_admin import firestore
-
-# Use a service account
-if (not len(firebase_admin._apps)):
-	cred = credentials.Certificate('./pet-adoption-tool-ml-firebase-adminsdk-fv4oh-5ab8f299bd.json')
-	firebase_admin.initialize_app(cred)
-db = firestore.client()
+from metrics import quadratic_kappa, quadratic_kappa_eval
 
 def quadratic_kappa(actuals, preds, N=4):
     """This function calculates the Quadratic Kappa Metric used for Evaluation in the PetFinder competition
@@ -201,8 +193,6 @@ def preprocessing(data):
 
     text_dataframe = text_dataframe[all_columns]
 
-    # tabular_result = text_dataframe.squeeze().to_dict()
-
     model = joblib.load("./models/best_xgb_model.joblib")
     explainer = shap.TreeExplainer(model)
 
@@ -237,6 +227,7 @@ def preprocessing(data):
     top_feature_names_chart = [all_columns[i] for i in top_indices_chart]
     top_feature_values_chart = [shap_values_for_chart[i] for i in top_indices_chart]
 
+
     counter = 0
     id = 0
     suggestion_result = []
@@ -247,7 +238,7 @@ def preprocessing(data):
     else:
         reference = bad_recommendations
 
-    if prediction_class == 0 or prediction_class == 1:
+    if prediction_class == 0:
         for feat in top_feature_names:
             if feat in reference and top_feature_values[id] > 0:
                 suggestion = get_good_suggestion(reference, feat, int(text_dataframe[feat]))
@@ -293,7 +284,8 @@ def preprocessing(data):
 
     print(final_result)
     return [final_result, selected_shap_values, selected_feature_names]
-    
+
+   
 
 def plot_shap_waterfall(shap_values, feature_names, top_n=20):
     top_n = min(top_n, len(shap_values) // 2)
@@ -323,8 +315,10 @@ def get_bad_suggestion(ref, category, value):
     
     if category == "VideoAmt":
         key = 0 if value == 0 else 1
-    elif category in ["PhotoAmt", "LumpedFee", "DescriptionLength", "reading_time"]:
+    elif category in ["PhotoAmt", "DescriptionLength", "reading_time"]:
         key = 0 if value <= 3 else 1
+    elif category == "LumpedFee":
+        key = 0 if value == 0 else 1
     elif category == "QuantityModified":
         key = 1 if value > 1 else None
     elif category == "Blurriness":

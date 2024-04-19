@@ -23,9 +23,10 @@
             <div class="prediction-container">
                 <h1>Recommended Actions</h1>
                 <div class="flex-center">
-                    <ul>
+                    <ul v-if="this.result.Recommendations != []">
                         <li v-for="action in this.result.Recommendations" :key="action">{{ action }}</li>
                     </ul>
+                    <p v-else>You are doing great! No recommendations available.</p>
                 </div>
             </div>
             <div class="prediction-container">
@@ -48,6 +49,9 @@
         <div class="bar-chart">
             <bar-chart :data="shapData" xtitle="SHAP Value (Impact on Model Output)" :colors="barColors" title="Top 20 Positive and Top 20 Negative SHAP Values"></bar-chart>
             <!-- <img src="http://127.0.0.1:5000/shap_plot" alt="SHAP Values Waterfall Plot" width="100%"> -->
+        </div>
+        <div class="flex-center">
+            <button class="button" @click="backToHome">Back</button>
         </div>
     </div>
 </template>
@@ -85,7 +89,7 @@ export default {
                 Result: "1 Week",
                 Confidence: 0,
                 Shapleys: {"FurLength": 0.221, "PhotoAmt": 0.11},
-                Recommendations: ['Increase photo amount', 'Add more description', 'Don`t vaccinate'],
+                Recommendations: [],
 
             },
             actualSampleConfidence: 0.6,
@@ -129,6 +133,9 @@ export default {
             this.barColors = Object.values(this.shapData).map(value => {
                 return value >= 0 ? this.positiveColor : this.negativeColor;
             });
+        },
+        backToHome() {
+            this.$emit("selected", "form");
         }
     },
 };
