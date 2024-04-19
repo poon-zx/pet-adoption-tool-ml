@@ -179,9 +179,11 @@ def preprocessing(data):
 
     label_categorical_cols = ['MaturitySize', 'QuantityModified', 'LumpedFee', 'RescuerActivity']
 
-    label_encoder = LabelEncoder()
+    label_encoder = joblib.load("./models/label_encoder.save")
     for col in label_categorical_cols:
-        text_dataframe[col] = label_encoder.fit_transform(text_dataframe[col].astype(str))
+        text_dataframe[col] = label_encoder.transform(text_dataframe[col].astype(str))
+
+    print(text_dataframe["LumpedFee"])
 
     text_dataframe = pd.get_dummies(text_dataframe, columns=ohe_categorical_cols)
 
