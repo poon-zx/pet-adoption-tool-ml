@@ -7,7 +7,7 @@
         <SelectText v-if="selected=== 'selectText'" @selected="updateSelected" @text="updateDescription"/>
         <SelectImage v-if="selected=== 'selectImage'" @image="updateImage" @isLoading="updateIsLoading" @handleSubmit="handleSubmit"/>
         <Loading :isLoading = "isLoading"/>
-        <Result v-if="selected === 'result'" :result="result" :pet="pet" :actualConfidence="actualConfidence" :shapData="shapData"/>
+        <Result v-if="selected === 'result'" :result="result" :pet="pet" :actualConfidence="actualConfidence" :shapData="shapData" @selected="updateSelected"/>
         <!-- <button @click="test">CLICK HERE</button> -->
     </div>
 </template>
@@ -63,6 +63,11 @@ export default {
     methods: {
         updateSelected(selected) {
             console.log("updateselected");
+            window.scrollTo({
+                top: 0,
+                left: 0,
+                behavior: "smooth",
+            });
             this.selected = selected;
         },
         updatePet(pet) {
@@ -79,7 +84,8 @@ export default {
         },
         async handleSubmit() {
             try {
-                const response = await axios.post('http://127.0.0.1:5000/upload', this.pet);
+                const response = await axios.post('https://pet-prediction-tool-wuvjjxgjhq-as.a.run.app/upload', this.pet);
+                // const response = await axios.post('http://127.0.0.1:5000/upload', this.pet);
                 const temp = response.data[0];
                 console.log(temp);
                 this.actualConfidence = parseFloat((temp.Confidence).toFixed(3));
@@ -93,6 +99,11 @@ export default {
                     shapData[shapFeatures[i]] = shapValues[i];
                 }
                 this.shapData = shapData;
+                window.scrollTo({
+                    top: 0,
+                    left: 0,
+                    behavior: "smooth",
+                });
                 this.selected = 'result';
                 this.isLoading = false;
 
@@ -102,7 +113,8 @@ export default {
         },
         async test() {
             try {
-                const response = await axios.post('http://127.0.0.1:5000/upload', this.sample_json);
+                const response = await axios.post('https://pet-prediction-tool-wuvjjxgjhq-as.a.run.app/upload', this.sample_json);
+                // const response = await axios.post('http://127.0.0.1:5000/upload', this.pet);
                 console.log(response.data);
                 const temp = response.data[0];
                 console.log(temp);

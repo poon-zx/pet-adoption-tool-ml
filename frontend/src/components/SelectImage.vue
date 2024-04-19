@@ -23,12 +23,12 @@ export default {
     data() {
         return {
             images: [ 
-                {id: "029e31937", imgUrl: "src/assets/029e31937.jpg"},
-                {id: "025e61a40", imgUrl: "src/assets/025e61a40.jpg"},
-                {id: "0162ff4ad", imgUrl: "src/assets/0162ff4ad.jpg"},
-                {id: "01e35d03f", imgUrl: "src/assets/01e35d03f.jpg"},
-                {id: "00d26f809", imgUrl: "src/assets/00d26f809.jpg"},
-                {id: "002efc654", imgUrl: "src/assets/002efc654.jpg"},
+                {id: "029e31937", imgUrl: "./029e31937.jpg"},
+                {id: "025e61a40", imgUrl: "./025e61a40.jpg"},
+                {id: "0162ff4ad", imgUrl: "./0162ff4ad.jpg"},
+                {id: "01e35d03f", imgUrl: "./01e35d03f.jpg"},
+                {id: "00d26f809", imgUrl: "./00d26f809.jpg"},
+                {id: "002efc654", imgUrl: "./002efc654.jpg"},
             ],
             selectedImage: null,
         }
