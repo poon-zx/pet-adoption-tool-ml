@@ -29,8 +29,8 @@ def quadratic_kappa(actuals, preds, N=4):
         pred_hist[item]+=1
 
     E = np.outer(act_hist, pred_hist);
-    E = E/E.sum();
-    O = O/O.sum();
+    E = E/E.sum()
+    O = O/O.sum()
 
     num=0
     den=0
@@ -179,11 +179,16 @@ def preprocessing(data):
 
     label_categorical_cols = ['MaturitySize', 'QuantityModified', 'LumpedFee', 'RescuerActivity']
 
-    label_encoder = joblib.load("./models/label_encoder.save")
-    for col in label_categorical_cols:
-        text_dataframe[col] = label_encoder.transform(text_dataframe[col].astype(str))
+    label_encoder_size = joblib.load("./models/label_encoder_size.save")
+    label_encoder_quant = joblib.load("./models/label_encoder_quant.save")
+    label_encoder_fee = joblib.load("./models/label_encoder_fee.save")
+    label_encoder_activity = joblib.load("./models/label_encoder_activity.save")
 
-    print(text_dataframe["LumpedFee"])
+    text_dataframe['MaturitySize'] = label_encoder_size.transform(text_dataframe['MaturitySize'].astype(str))
+    text_dataframe['QuantityModified'] = label_encoder_quant.transform(text_dataframe['QuantityModified'].astype(str))
+    text_dataframe['LumpedFee'] = label_encoder_fee.transform(text_dataframe['LumpedFee'].astype(str))
+    text_dataframe['RescuerActivity'] = label_encoder_activity.transform(text_dataframe['RescuerActivity'].astype(str))
+    
 
     text_dataframe = pd.get_dummies(text_dataframe, columns=ohe_categorical_cols)
 
